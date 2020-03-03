@@ -11,7 +11,7 @@ let items = ['Wake', 'Bathe', 'Make Coffee'];
 let workItems = [];
 
 app.get('/', function(req, res) {
-  let day = date(); //calls the module from date.js to get the date
+  let day = date.getDay(); //calls the module from date.js to get the long date or name of the day of the week
   res.render('list', { listTitle: day, newListItemArray: items });
 });
 
