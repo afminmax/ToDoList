@@ -7,6 +7,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 let items = ['Wake', 'Bathe', 'Make Coffee'];
+let workItems = [];
 
 app.get('/', function(req, res) {
   let today = new Date();
@@ -19,14 +20,27 @@ app.get('/', function(req, res) {
 
   let day = today.toLocaleDateString('en-US', options);
 
-  res.render('list', { kindOfDay: day, newListItemArray: items });
+  res.render('list', { listTitle: day, newListItemArray: items });
 });
 
 app.post('/', function(req, res) {
   let item = req.body.newItem;
-  items.push(item);
-  res.redirect('/');
+  if (req.body.list === 'Work') {
+    workItems.push(item);
+    res.redirect('/work');
+  } else {
+    items.push(item);
+    res.redirect('/');
+  }
 });
+
+app.get('/work', function(req, res) {
+  res.render('list', { listTitle: 'Work List', newListItemArray: workItems });
+});
+
+// app.post('/work', function(req, res) {
+//   let item = req.body.newItem;
+// });
 
 app.listen(3000, function() {
   console.log('...server started on port 3000...');
