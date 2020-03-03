@@ -1,8 +1,8 @@
 // This code snippet gets the current written day name.
 // This is how you build modular functions in JS.
 
-module.exports.getDate = getDate;
-function getDate() {
+exports.getDate = function() {
+  //anonymous function
   let today = new Date();
 
   let options = {
@@ -11,21 +11,19 @@ function getDate() {
     month: 'long'
   };
 
-  let day = today.toLocaleDateString('en-US', options);
-  return day;
-}
+  return today.toLocaleDateString('en-US', options);
+};
 
-module.exports.getDay = getDay;
-function getDay() {
+exports.getDay = function() {
+  //anonymous function
   let today = new Date();
 
   let options = {
     weekday: 'long'
   };
 
-  let day = today.toLocaleDateString('en-US', options);
-  return day;
-}
+  return today.toLocaleDateString('en-US', options);
+};
 
 // checks that the two functions are tied to the module
 // console.log(module.exports);
