@@ -1,14 +1,20 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const date = require(__dirname + '/date.js');
+const mongoose = require('mongoose');
 
 const app = express();
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-let items = ['Wake', 'Bathe', 'Make Coffee'];
-let workItems = [];
+// arrays removed for db version 2
+// let items = ['Wake', 'Bathe', 'Make Coffee'];
+// let workItems = [];
+
+mongoose.connect('mongodb://localhost:27017/todolistDB', {
+  useNewUrlParser: true
+});
 
 app.get('/', function(req, res) {
   let day = date.getDay(); //calls the module from date.js to get the long date or name of the day of the week
