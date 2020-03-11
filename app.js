@@ -22,34 +22,46 @@ const itemsSchema = new mongoose.Schema({
 });
 
 const Item = mongoose.model('item', itemsSchema);
+// ------------------------- MONGODB DECLARATIONS ------------------------------------ //
+
+// ------------------------- CREATE DOCUMENTS IN MONGODB ----------------------------- //
 
 const item1 = new Item({
-  name: 'Welcome to your to do list'
+  name: 'Wake up'
 });
 
 const item2 = new Item({
-  name: 'Click the button to add a new item.'
+  name: 'Brush teeth'
 });
 
 const item3 = new Item({
-  name: '<--- Click this to delete an item.'
+  name: 'Make coffee'
 });
 
 const defaultItems = [item1, item2, item3];
 
-Item.insertMany(defaultItems, function(err) {
-  if (err) {
-    console.log(err);
-  } else {
-    console.log('Items have been added to the database');
-  }
-});
-
-// ------------------------- MONGODB DECLARATIONS ------------------------------------ //
+// ----------------------------------------------------------------------------------- //
 
 app.get('/', function(req, res) {
   //let day = date.getDay(); //calls the module from date.js to get the long date or name of the day of the week
-  res.render('list', { listTitle: 'Today', newListItemArray: items });
+  Item.find({}, function(err, foundItems) {
+    if (foundItems.length === 0) {
+      Item.insertMany(defaultItems, function(err) {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log('Default items have been added to the database');
+        }
+      });
+      res.redirect('/');
+    } else {
+      console.log(foundItems);
+      res.render('list', {
+        listTitle: 'Today',
+        newListItemArray: foundItems
+      });
+    }
+  });
 });
 
 app.post('/', function(req, res) {
