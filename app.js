@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const date = require(__dirname + '/date.js');
 const mongoose = require('mongoose');
+const _ = require('lodash');
 
 const app = express();
 app.set('view engine', 'ejs');
@@ -66,12 +67,21 @@ app.get('/', function(req, res) {
 
 app.post('/', function(req, res) {
   const itemName = req.body.newItem;
+  const listName = req.body.list;
   const item = new Item({
     name: itemName
   });
 
-  item.save(); //mongoose shortcut to save the new item
-  res.redirect('/');
+  if (listName === 'Today') {
+    item.save(); //mongoose shortcut to save the new item
+    res.redirect('/');
+  } else {
+    List.findOne({ name: listName }, function(err, foundList) {
+      foundList.items.push(item);
+      foundList.save();
+      res.redirect('/' + listName);
+    });
+  }
 
   // -----------old v1 logic deprecated ----------- //
   // let item = req.body.newItem;
@@ -88,19 +98,72 @@ app.post('/', function(req, res) {
 app.post('/delete', function(req, res) {
   // console.log(req.body.checkbox);
   const checkedItemID = req.body.checkbox;
-  Item.findByIdAndRemove(checkedItemID, function(err) {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log('The item has been deleted from the db');
-      res.redirect('/');
+  const listName = req.body.listName;
+
+  if (listName === 'Today') {
+    Item.findByIdAndRemove(checkedItemID, function(err) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log('The item has been deleted from the db');
+        res.redirect('/');
+      }
+    });
+  } else {
+    List.findOneAndUpdate(
+      { name: listName },
+      { $pull: { items: { _id: checkedItemID } } },
+      function(err, foundList) {
+        if (!err) {
+          res.redirect('/' + listName);
+        }
+      }
+    );
+  }
+});
+
+// -----------old v1 logic deprecated ----------- //
+// app.get('/work', function(req, res) {
+//   res.render('list', { listTitle: 'Work List', newListItemArray: workItems });
+// });
+// -------------------------------------------- //
+
+// ------------------------- CUSTOM LIST ROUTES ------------------------------------ //
+
+const listSchema = {
+  name: String,
+  items: [itemsSchema]
+};
+
+const List = mongoose.model('list', listSchema);
+
+app.get('/:customListName', function(req, res) {
+  const customListName = _.capitalize(req.params.customListName);
+
+  console.log(customListName);
+
+  List.findOne({ name: customListName }, function(err, foundList) {
+    if (!err) {
+      if (!foundList) {
+        console.log('List does not exist');
+        const list = new List({
+          name: customListName,
+          items: defaultItems
+        });
+        list.save();
+        res.redirect('/' + customListName);
+      } else {
+        console.log('List does exist');
+        res.render('list', {
+          listTitle: foundList.name,
+          newListItemArray: foundList.items
+        });
+      }
     }
   });
 });
 
-app.get('/work', function(req, res) {
-  res.render('list', { listTitle: 'Work List', newListItemArray: workItems });
-});
+// ------------------------- END CUSTOM LIST ROUTES -------------------------------- //
 
 app.get('/about', function(req, res) {
   res.render('about');
