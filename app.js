@@ -19,7 +19,7 @@ app.use(express.static('public'));
 // });
 
 mongoose.connect(
-  'mongodb+srv://admin-afminmax:admin098%23@sandbox1-qw78t.mongodb.net/todolistDB',
+  'mongodb+srv://******:*****@*********.mongodb.net/todolistDB',
   {
     useNewUrlParser: true
   }
